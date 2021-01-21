@@ -1,17 +1,24 @@
 import { Card, Suits } from './card'
 import { Hand } from './hand'
-import { Rank } from './handPower'
+import { ComparisonResult, Rank } from './handPower'
 
 describe('Hand', () => {
+  const straighFlushCards = [
+    new Card(14, Suits.Club),
+    new Card(13, Suits.Club),
+    new Card(12, Suits.Club),
+    new Card(10, Suits.Club),
+    new Card(11, Suits.Club),
+  ]
+  const onePairCards = [
+    new Card(10, Suits.Club),
+    new Card(10, Suits.Diamond),
+    new Card(14, Suits.Club),
+    new Card(12, Suits.Club),
+    new Card(11, Suits.Club),
+  ]
   it('Can determined one pair', () => {
-    const cards = [
-      new Card(10, Suits.Club),
-      new Card(10, Suits.Diamond),
-      new Card(14, Suits.Club),
-      new Card(12, Suits.Club),
-      new Card(11, Suits.Club),
-    ]
-    const hand = new Hand(cards)
+    const hand = new Hand(onePairCards)
     const result = hand.power()
     expect(result.rank).toEqual(Rank.OnePair)
     expect(result.highs).toEqual([10, 14, 12, 11])
@@ -116,13 +123,7 @@ describe('Hand', () => {
   })
 
   it('Can determined Straight Flush', () => {
-    const cards = [
-      new Card(14, Suits.Club),
-      new Card(13, Suits.Club),
-      new Card(12, Suits.Club),
-      new Card(10, Suits.Club),
-      new Card(11, Suits.Club),
-    ]
+    const cards = straighFlushCards
     const hand = new Hand(cards)
     const result = hand.power()
     expect(result.rank).toEqual(Rank.StraightFlush)
@@ -141,5 +142,11 @@ describe('Hand', () => {
     const result = hand.power()
     expect(result.rank).toEqual(Rank.StraightFlush)
     expect(result.highs).toEqual([5, 4, 3, 2, 1])
+  })
+
+  it('Straight flush win One Hand', () => {
+    const hand1 = new Hand(straighFlushCards)
+    const hand2 = new Hand(onePairCards)
+    expect(hand1.compareWith(hand2)).toEqual(ComparisonResult.Win)
   })
 })
