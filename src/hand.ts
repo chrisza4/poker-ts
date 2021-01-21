@@ -19,14 +19,14 @@ export class Hand {
     return new NumberSet(src, dest).isSamePattern()
   }
 
-  private isConsequtive(cardValues: number[]): boolean {
+  private isBackwardConsequtive(cardValues: number[]): boolean {
     for (const index in cardValues) {
       if (parseInt(index, 10) === cardValues.length - 1) {
         continue
       }
       const thisCardValue = cardValues[index]
       const nextCardValue = cardValues[parseInt(index) + 1]
-      if (thisCardValue + 1 !== nextCardValue) {
+      if (thisCardValue - 1 !== nextCardValue) {
         return false
       }
     }
@@ -37,14 +37,21 @@ export class Hand {
     if (highs.length !== 5) {
       return { straight: false, highs }
     }
-    if (this.isConsequtive(highs)) {
+    if (this.isBackwardConsequtive(highs)) {
       return { straight: true, highs }
     }
-    const highsAceFirst = highs.map((h) => (h === 14 ? 1 : h)).sort()
-    if (this.isConsequtive(highsAceFirst)) {
-      return { straight: true, highs: highsAceFirst.reverse() }
+    const highsAceFirst = highs
+      .map((h) => (h === 14 ? 1 : h))
+      .sort()
+      .reverse()
+    if (this.isBackwardConsequtive(highsAceFirst)) {
+      return { straight: true, highs: highsAceFirst }
     }
     return { straight: false, highs }
+  }
+
+  private isFlush(): boolean {
+    return new Set(this.cards.map((c) => c.suits)).size === 1
   }
 
   private compareHighs(anotherHighs: number[]): ComparisonResult {
@@ -80,7 +87,21 @@ export class Hand {
         if (b > a) return 1
         return 0
       })
+    const flush = this.isFlush()
     const { straight, highs } = this.isStraight(initialHighs)
+
+    if (straight && flush) {
+      return new HandPower(Rank.StraightFlush, highs)
+    }
+    if (this.isSamePattern(frequencyPattern, [4, 1])) {
+      return new HandPower(Rank.FourOfAKind, highs)
+    }
+    if (this.isSamePattern(frequencyPattern, [3, 2])) {
+      return new HandPower(Rank.FullHouse, highs)
+    }
+    if (flush) {
+      return new HandPower(Rank.Flush, highs)
+    }
     if (straight) {
       return new HandPower(Rank.Straight, highs)
     }
