@@ -1,5 +1,5 @@
 import { Card, Suits } from './card'
-import { Hand } from './hand'
+import { CardFrequencyMap, Hand } from './hand'
 import { ComparisonResult, Rank } from './handPower'
 
 describe('Hand', () => {
@@ -148,5 +148,44 @@ describe('Hand', () => {
     const hand1 = new Hand(straighFlushCards)
     const hand2 = new Hand(onePairCards)
     expect(hand1.compareWith(hand2)).toEqual(ComparisonResult.Win)
+  })
+})
+
+describe('Card frequencies', () => {
+  it('Can calculate frequency and card values', () => {
+    const card1 = [
+      new Card(14, Suits.Club),
+      new Card(14, Suits.Diamond),
+      new Card(11, Suits.Club),
+      new Card(11, Suits.Diamond),
+      new Card(11, Suits.Heart),
+    ]
+    const card2 = [
+      new Card(14, Suits.Club),
+      new Card(2, Suits.Club),
+      new Card(5, Suits.Club),
+      new Card(3, Suits.Club),
+      new Card(10, Suits.Club),
+    ]
+
+    const card3 = [
+      new Card(10, Suits.Club),
+      new Card(12, Suits.Diamond),
+      new Card(11, Suits.Club),
+      new Card(11, Suits.Club),
+      new Card(11, Suits.Club),
+    ]
+
+    const result1 = new CardFrequencyMap(card1)
+    expect(result1.cardFrequencySorted()).toEqual([3, 2])
+    expect(result1.cardValueSortedByFrequency()).toEqual([11, 14])
+
+    const result2 = new CardFrequencyMap(card2)
+    expect(result2.cardFrequencySorted()).toEqual([1, 1, 1, 1, 1])
+    expect(result2.cardValueSortedByFrequency()).toEqual([14, 10, 5, 3, 2])
+
+    const result3 = new CardFrequencyMap(card3)
+    expect(result3.cardFrequencySorted()).toEqual([3, 1, 1])
+    expect(result3.cardValueSortedByFrequency()).toEqual([11, 12, 10])
   })
 })

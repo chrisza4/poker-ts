@@ -2,10 +2,35 @@ import { Card } from './card'
 import { ComparisonResult, Rank, HandPower } from './handPower'
 import PatternMatcher from './utils/patternMatcher'
 
-type CardFrequencies = { [key: number]: number }
 type StraightResult = {
   straight: boolean
   highs: number[]
+}
+
+export class CardFrequencyMap {
+  private cardFrequencyMap: { [key: number]: number }
+  constructor(cards: Card[]) {
+    this.cardFrequencyMap = cards.reduce((acc, card) => {
+      acc[card.number] = (acc[card.number] || 0) + 1
+      return acc
+    }, {})
+  }
+
+  cardFrequencySorted(): number[] {
+    return Object.values(this.cardFrequencyMap).sort().reverse()
+  }
+
+  cardValueSortedByFrequency(): number[] {
+    return Object.keys(this.cardFrequencyMap)
+      .map((a) => parseInt(a))
+      .sort((b, a) => {
+        if (this.cardFrequencyMap[a] < this.cardFrequencyMap[b]) return -1
+        if (this.cardFrequencyMap[a] > this.cardFrequencyMap[b]) return 1
+        if (a < b) return -1
+        if (b > a) return 1
+        return 0
+      })
+  }
 }
 
 export class Hand {
@@ -56,30 +81,19 @@ export class Hand {
   }
 
   public power(): HandPower {
-    const freq = this.cards.reduce<CardFrequencies>((acc, card) => {
-      acc[card.number] = (acc[card.number] || 0) + 1
-      return acc
-    }, {})
-    const frequencyPattern = Object.values(freq).sort().reverse()
-    const initialHighs = Object.keys(freq)
-      .map((a) => parseInt(a, 10))
-      .sort((b, a) => {
-        if (freq[a] < freq[b]) return -1
-        if (freq[a] > freq[b]) return 1
-        if (a < b) return -1
-        if (b > a) return 1
-        return 0
-      })
+    const cardFrequencyMap = new CardFrequencyMap(this.cards)
+    const frequency = cardFrequencyMap.cardFrequencySorted()
+    const initialHighs = cardFrequencyMap.cardValueSortedByFrequency()
     const flush = this.isFlush()
     const { straight, highs } = this.isStraight(initialHighs)
 
     if (straight && flush) {
       return new HandPower(Rank.StraightFlush, highs)
     }
-    if (this.isSamePattern(frequencyPattern, [4, 1])) {
+    if (this.isSamePattern(frequency, [4, 1])) {
       return new HandPower(Rank.FourOfAKind, highs)
     }
-    if (this.isSamePattern(frequencyPattern, [3, 2])) {
+    if (this.isSamePattern(frequency, [3, 2])) {
       return new HandPower(Rank.FullHouse, highs)
     }
     if (flush) {
@@ -88,17 +102,15 @@ export class Hand {
     if (straight) {
       return new HandPower(Rank.Straight, highs)
     }
-    if (this.isSamePattern(frequencyPattern, [3, 1, 1])) {
+    if (this.isSamePattern(frequency, [3, 1, 1])) {
       return new HandPower(Rank.ThreeOfAKind, highs)
     }
-    if (this.isSamePattern(frequencyPattern, [2, 2, 1])) {
+    if (this.isSamePattern(frequency, [2, 2, 1])) {
       return new HandPower(Rank.TwoPairs, highs)
     }
-    if (this.isSamePattern(frequencyPattern, [2, 1, 1, 1])) {
+    if (this.isSamePattern(frequency, [2, 1, 1, 1])) {
       return new HandPower(Rank.OnePair, highs)
     }
-    throw Error(
-      `Unexpected pattern ${JSON.stringify(frequencyPattern, null, 2)}`
-    )
+    throw Error(`Unexpected pattern ${JSON.stringify(frequency, null, 2)}`)
   }
 }
