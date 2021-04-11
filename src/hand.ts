@@ -1,6 +1,6 @@
 import { Card } from './card'
 import { ComparisonResult, Rank, HandPower } from './handPower'
-import NumberSet from './utils/patternMatcher'
+import PatternMatcher from './utils/patternMatcher'
 
 type CardFrequencies = { [key: number]: number }
 type StraightResult = {
@@ -16,32 +16,32 @@ export class Hand {
   }
 
   private isSamePattern(src: number[], dest: number[]): boolean {
-    return new NumberSet(src, dest).isSamePattern()
-  }
-
-  private isBackwardConsequtive(cardValues: number[]): boolean {
-    for (let index = 0; index < cardValues.length - 1; index++) {
-      const thisCardValue = cardValues[index]
-      const nextCardValue = cardValues[index + 1]
-      if (thisCardValue - 1 !== nextCardValue) {
-        return false
-      }
-    }
-    return true
+    return new PatternMatcher(src, dest).isSamePattern()
   }
 
   private isStraight(highs: number[]): StraightResult {
+    function isBackwardConsequtive(cardValues: number[]): boolean {
+      for (let index = 0; index < cardValues.length - 1; index++) {
+        const thisCardValue = cardValues[index]
+        const nextCardValue = cardValues[index + 1]
+        if (thisCardValue - 1 !== nextCardValue) {
+          return false
+        }
+      }
+      return true
+    }
+
     if (highs.length !== 5) {
       return { straight: false, highs }
     }
-    if (this.isBackwardConsequtive(highs)) {
+    if (isBackwardConsequtive(highs)) {
       return { straight: true, highs }
     }
     const highsAceFirst = highs
       .map((h) => (h === 14 ? 1 : h))
       .sort()
       .reverse()
-    if (this.isBackwardConsequtive(highsAceFirst)) {
+    if (isBackwardConsequtive(highsAceFirst)) {
       return { straight: true, highs: highsAceFirst }
     }
     return { straight: false, highs }
