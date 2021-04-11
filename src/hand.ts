@@ -97,6 +97,8 @@ export class Hand {
     if (this.isSamePattern(frequencyPattern, [2, 1, 1, 1])) {
       return new HandPower(Rank.OnePair, highs)
     }
-    throw Error('Not implemented')
+    throw Error(
+      `Unexpected pattern ${JSON.stringify(frequencyPattern, null, 2)}`
+    )
   }
 }
