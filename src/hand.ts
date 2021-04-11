@@ -20,12 +20,9 @@ export class Hand {
   }
 
   private isBackwardConsequtive(cardValues: number[]): boolean {
-    for (const index in cardValues) {
-      if (parseInt(index, 10) === cardValues.length - 1) {
-        continue
-      }
+    for (let index = 0; index < cardValues.length - 1; index++) {
       const thisCardValue = cardValues[index]
-      const nextCardValue = cardValues[parseInt(index) + 1]
+      const nextCardValue = cardValues[index + 1]
       if (thisCardValue - 1 !== nextCardValue) {
         return false
       }
@@ -52,20 +49,6 @@ export class Hand {
 
   private isFlush(): boolean {
     return new Set(this.cards.map((c) => c.suits)).size === 1
-  }
-
-  private compareHighs(anotherHighs: number[]): ComparisonResult {
-    const { highs } = this.power()
-    for (let index = 0; index < highs.length; index++) {
-      if (highs[index] > anotherHighs[index]) {
-        return ComparisonResult.Win
-      }
-      if (highs[index] < anotherHighs[index]) {
-        return ComparisonResult.Lose
-      }
-    }
-
-    return ComparisonResult.Draw
   }
 
   public compareWith(anotherHand: Hand): ComparisonResult {
