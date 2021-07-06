@@ -17,6 +17,21 @@ describe('Hand', () => {
     new Card(12, Suits.Club),
     new Card(11, Suits.Club),
   ]
+
+  it('Can determined no pair', () => {
+    const noPairCards = [
+      new Card(10, Suits.Club),
+      new Card(5, Suits.Diamond),
+      new Card(14, Suits.Club),
+      new Card(12, Suits.Club),
+      new Card(11, Suits.Club),
+    ]
+    const hand = new Hand(noPairCards)
+    const result = hand.power()
+    expect(result.rank).toEqual(Rank.Nothing)
+    expect(result.highs).toEqual([14, 12, 11, 10, 5])
+  })
+
   it('Can determined one pair', () => {
     const hand = new Hand(onePairCards)
     const result = hand.power()

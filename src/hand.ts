@@ -10,26 +10,29 @@ type StraightResult = {
 export class CardFrequency {
   private cardFrequencyMap: { [key: number]: number }
   constructor(cards: Card[]) {
-    this.cardFrequencyMap = cards.reduce((acc, card) => {
-      acc[card.number] = (acc[card.number] || 0) + 1
-      return acc
-    }, {})
+    const cardFrequencyMap = {}
+    for (const card of cards) {
+      cardFrequencyMap[card.number] = (cardFrequencyMap[card.number] || 0) + 1
+    }
+    this.cardFrequencyMap = cardFrequencyMap
   }
 
   cardFrequencySorted(): number[] {
     return Object.values(this.cardFrequencyMap).sort().reverse()
   }
 
+  private getCardValues() {
+    return Object.keys(this.cardFrequencyMap).map((a) => parseInt(a))
+  }
+
   cardValueSortedByFrequency(): number[] {
-    return Object.keys(this.cardFrequencyMap)
-      .map((a) => parseInt(a))
-      .sort((b, a) => {
-        if (this.cardFrequencyMap[a] < this.cardFrequencyMap[b]) return -1
-        if (this.cardFrequencyMap[a] > this.cardFrequencyMap[b]) return 1
-        if (a < b) return -1
-        if (b > a) return 1
-        return 0
-      })
+    return this.getCardValues().sort((b, a) => {
+      if (this.cardFrequencyMap[a] < this.cardFrequencyMap[b]) return -1
+      if (this.cardFrequencyMap[a] > this.cardFrequencyMap[b]) return 1
+      if (a < b) return -1
+      if (b > a) return 1
+      return 0
+    })
   }
 
   isFrequencyMatch(pattern: number[]): boolean {
@@ -112,6 +115,9 @@ export class Hand {
     }
     if (cardFrequency.isFrequencyMatch([2, 1, 1, 1])) {
       return new HandPower(Rank.OnePair, highs)
+    }
+    if (cardFrequency.isFrequencyMatch([1, 1, 1, 1, 1])) {
+      return new HandPower(Rank.Nothing, highs)
     }
     throw Error(
       `Unexpected pattern ${JSON.stringify(
